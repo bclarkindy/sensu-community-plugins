@@ -1,0 +1,10 @@
+# Used for personal development
+
+MethodLength:
+  Max: 40
+
+LineLength:
+  Max: 80
+
+Documentation:
+  Enabled: False
