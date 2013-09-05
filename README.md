@@ -1,6 +1,7 @@
 # Sensu Community Plugins
+**Upstream master:** [![Build Status](https://travis-ci.org/sensu/sensu-community-plugins.png?branch=master)](https://travis-ci.org/sensu/sensu-community-plugins)
 
-[![Build Status](https://travis-ci.org/sensu/sensu-community-plugins.png?branch=master)](https://travis-ci.org/sensu/sensu-community-plugins)
+**Branch bcmaster:** [![Build Status](https://travis-ci.org/bclarkindy/sensu-community-plugins.png?branch=bcmaster)](https://travis-ci.org/bclarkindy/sensu-community-plugins)
 
 ## Community plugins, extensions, and handlers
 
