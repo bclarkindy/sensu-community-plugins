@@ -52,25 +52,25 @@ class MyCLI
          short: '-a ARG[,ARG]',
          long: '--args',
          description: 'List of args to plugin (besides --host and --scheme if included)',
-         proc: proc { |a| a.join(' ') }
+         proc: proc { |a| a.split(',') }
 end
 
 cli = MyCLI.new
 exit unless cli.parse_options
 
-ruby_exe = '/opt/embedded/bin/ruby'
+ruby_exe = '/opt/sensu/embedded/bin/ruby'
 plugin = "/etc/sensu/plugins/#{cli.config[:plugin]}"
 ns = cli.config[:namespace]
 tenant = cli.config[:tenant]
 host = cli.config[:host]
 ip = settings["#{tenant}_guests"][host]
 scheme = " --scheme #{cli.config[:scheme].gsub('*', host)}" if cli.config[:scheme]
-
+args = cli.config[:args].join(' ') if cli.config[:args]
 creds = ''
 if cli.config[:creds]
   creds = " -u #{settings["client"][tenant]["user"]} -p #{settings["client"][tenant]["password"]}"
 end
 
-cmd = "ip netns exec #{ns} #{ruby_exe} #{plugin}#{creds} --host #{ip} #{cli.config[:args]}#{scheme}"
+cmd = "ip netns exec #{ns} #{ruby_exe} #{plugin}#{creds} --host #{ip} #{args}#{scheme}"
 exec cmd
 
