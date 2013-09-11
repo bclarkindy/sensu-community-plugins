@@ -1,19 +1,19 @@
 #!/usr/bin/env ruby
 #
-# Get Windows Disk Performance Counters via WRM/WMIi (from Linux!)
+# Get Windows Disk Performance Counters via WRM/WMI (from Linux!)
 # =====
 #
 # Dependencies:
 #  -WinRM gem
 #
-# Allows user to query Windows machines via Windows Remote Management
-# (WinRM). Currently has only been tested from Linux. User must be a
-# member of administrators group, and WinRM must be properly configured
+# Query Windows machines remotely via Windows Remote Management (WinRM).
+# Currently has only been tested from Linux. User must be a member
+# of Windows administrators group, and WinRM must be properly configured
 # on the host.
 #
 # Has currently only been tested with plaintext authentication. An
 # example of how to configure WinRM on Windows host for unencrypted
-# authentication is below (from command prompt):
+# authentication is below (from Windows command prompt):
 #
 # winrm quickconfig -q
 # winrm set winrm/config @{MaxTimeoutms="1800000"}'
@@ -150,19 +150,23 @@ class WinDiskPerfMetrics < Sensu::Plugin::Metric::CLI::Graphite
     end
     config[:scheme] = "#{config[:host].gsub('.', '_')}.disk_perf" unless config[:scheme]
     disable_sspi = !(config[:auth_method] == :kerberos)
-    winrm = WinRM::WinRMWebService.new(get_endpoint, config[:auth_method],
-                                       user: config[:username],
-                                       pass: config[:password],
-                                       disable_sspi: disable_sspi,
-                                       ca_trust_path: config[:ca_trust_path])
+    begin
+      winrm = WinRM::WinRMWebService.new(get_endpoint, config[:auth_method],
+                                         user: config[:username],
+                                         pass: config[:password],
+                                         disable_sspi: disable_sspi,
+                                         ca_trust_path: config[:ca_trust_path])
 
-    winrm.wql(get_query)[:xml_fragment].each do |disk|
-      name = disk[:name].downcase.gsub(/[0-9]|:|_|\ /, '')
-      FIELDS.each do |field, metric|
-        next if field == 'Name'
-        output "#{config[:scheme]}.#{name}.#{metric}",
-               disk[field.snakecase.to_sym]
+      winrm.wql(get_query)[:xml_fragment].each do |disk|
+        name = disk[:name].downcase.gsub(/[0-9]|:|_|\ /, '')
+        FIELDS.each do |field, metric|
+          next if field == 'Name'
+          output "#{config[:scheme]}.#{name}.#{metric}",
+                 disk[field.snakecase.to_sym]
+        end
       end
+    rescue Exception => e
+      unknown e.message
     end
     ok
   end

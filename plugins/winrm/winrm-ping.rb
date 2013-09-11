@@ -106,14 +106,18 @@ class WinRMCheckPing < Sensu::Plugin::Check::CLI
     end
     disable_sspi = !(config[:auth_method] == :kerberos)
 
-    winrm = WinRM::WinRMWebService.new(get_endpoint, config[:auth_method],
-                                       user: config[:username],
-                                       pass: config[:password],
-                                       disable_sspi: disable_sspi,
-                                       ca_trust_path: config[:ca_trust_path])
+    begin
+      winrm = WinRM::WinRMWebService.new(get_endpoint, config[:auth_method],
+                                         user: config[:username],
+                                         pass: config[:password],
+                                         disable_sspi: disable_sspi,
+                                         ca_trust_path: config[:ca_trust_path])
 
-    wql = "SELECT * FROM Win32_PingStatus WHERE Address = \"#{config[:target]}\""
-    result = winrm.wql(wql)[:win32_ping_status][0][:status_code].to_i
+      wql = "SELECT * FROM Win32_PingStatus WHERE Address = \"#{config[:target]}\""
+      result = winrm.wql(wql)[:win32_ping_status][0][:status_code].to_i
+    rescue Exception => e
+      unknown e.message
+    end
     if result == 0
       ok "Ping successful from #{config[:host]} to #{config[:target]}"
     else
