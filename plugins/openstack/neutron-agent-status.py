@@ -7,6 +7,11 @@
 # -----------
 # - python-quantumclient and related libraries
 #
+# Performs API query to determine 'alive' status of all
+# (or filtered list of) Neutron network agents. Also has
+# ability to warn if any agents have been administratively
+# disabled.
+#
 # Copyright 2013 Brian Clark <brian.clark@cloudapt.com>
 #
 # Released under the same terms as Sensu (the MIT license);
